@@ -36,7 +36,8 @@ except Exception as e:
     print(f"Could not load model: {e}")
 
 try:
-    with open("merchant_registry.json", "r", encoding="utf-8") as f:
+    REG_PATH = os.path.join(os.path.dirname(__file__), "merchant_registry.json")
+    with open(REG_PATH, "r", encoding="utf-8") as f:
         raw_registry = json.load(f)
     VERIFIED_UPI_IDS = {entry["verified_upi_id"].strip().lower() for entry in raw_registry}
     UPI_TO_NAME = {
