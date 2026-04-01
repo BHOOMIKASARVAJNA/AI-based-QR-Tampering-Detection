@@ -25,8 +25,11 @@ import tensorflow as tf
 # ─────────────────────────────────────────
 
 try:
-    MODEL_PATH = os.path.join(os.path.dirname(__file__), "qr_tampering_model.keras")
-    model = tf.keras.models.load_model(MODEL_PATH)
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    MODEL_PATH = os.path.join(BASE_DIR, "qr_tampering_model.keras")
+    print("Current dir:", BASE_DIR)
+    print("Files in dir:", os.listdir(BASE_DIR))
+    print("Looking for model at:", MODEL_PATH)
     print("Model loaded successfully.")
 except Exception as e:
     model = None
