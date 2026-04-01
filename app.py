@@ -37,26 +37,32 @@ uploaded_file = st.file_uploader("Upload QR Image", type=["png", "jpg", "jpeg"])
 def predict(img):
     img = np.array(img)
 
-    # Convert to grayscale manually
+    # Convert to grayscale
     gray = np.mean(img, axis=2)
 
-    # Compute variance (noise indicator)
+    # Feature 1: variance (noise)
     variance = np.var(gray)
 
-    return variance
+    # Feature 2: edge roughness (manual gradient)
+    gx = np.abs(np.diff(gray, axis=1))
+    gy = np.abs(np.diff(gray, axis=0))
+    edge_strength = (np.mean(gx) + np.mean(gy)) / 2
+
+    return variance, edge_strength
 
 if uploaded_file:
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    score = predict(img)
+    var_score, edge_score = predict(img)
 
-    st.write(f"**Variance Score:** {score:.2f}")
+    st.write(f"**Variance Score:** {var_score:.2f}")
+    st.write(f"**Edge Score:** {edge_score:.2f}")
 
-    # Heuristic threshold
-    if score > 500:
+    # ✅ Better decision logic
+    if var_score > 8000 and edge_score > 25:
         st.error("⚠️ Possible Tampered QR Code")
     else:
         st.success("✅ Original QR Code")
 
-    st.caption("Note: Lightweight demo using image variance analysis.")
+    st.caption("Note: Lightweight demo using combined image heuristics.")
