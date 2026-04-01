@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI QR Tampering Detector</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+        }
+
+        input[type="file"] {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #00c6ff;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0072ff;
+            color: white;
+        }
+
+        .result {
+            margin-top: 25px;
+            text-align: left;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .safe { color: #00ff99; }
+        .warning { color: #ffd700; }
+        .danger { color: #ff4c4c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AI QR Tampering Detector</h1>
+
+    <input type="file" id="qrFile">
+    <br>
+    <button onclick="analyzeQR()">Analyze QR Code</button>
+
+    <div class="result" id="result">
+        No QR analyzed yet.
+    </div>
+</div>
+
+<script>
+async function analyzeQR() {
+    const fileInput = document.getElementById("qrFile");
+    const resultDiv = document.getElementById("result");
+
+    if (!fileInput.files.length) {
+        alert("Please select an image first.");
+        return;
+    }
+
+    resultDiv.innerHTML = "Analyzing...";
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const response = await fetch("/analyze-qr", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await response.json();
+
+    let statusClass = "safe";
+    if (data.risk_score >= 70) statusClass = "danger";
+    else if (data.risk_score >= 40) statusClass = "warning";
+
+    resultDiv.innerHTML = `
+        <p><strong>Status:</strong> <span class="${statusClass}">${data.status}</span></p>
+        <p><strong>Risk Score:</strong> ${data.risk_score}%</p>
+        <p><strong>Tampering Probability:</strong> ${data.tampering_probability}</p>
+        <p><strong>Extracted UPI:</strong> ${data.extracted_upi || "None"}</p>
+        <p><strong>Reasons:</strong> ${data.reasons.join(", ") || "None"}</p>
+    `;
+}
+</script>
+
+</body>
+</html>
