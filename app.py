@@ -26,7 +26,6 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-import cv2
 
 st.set_page_config(page_title="QR Tampering Detection", layout="centered")
 
@@ -38,29 +37,26 @@ uploaded_file = st.file_uploader("Upload QR Image", type=["png", "jpg", "jpeg"])
 def predict(img):
     img = np.array(img)
 
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    # Convert to grayscale manually
+    gray = np.mean(img, axis=2)
 
-    # Edge detection
-    edges = cv2.Canny(gray, 100, 200)
+    # Compute variance (noise indicator)
+    variance = np.var(gray)
 
-    # Calculate edge density
-    edge_density = np.sum(edges) / edges.size
-
-    return edge_density
+    return variance
 
 if uploaded_file:
-    img = Image.open(uploaded_file)
+    img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
     score = predict(img)
 
-    st.write(f"Edge Score: {score:.4f}")
+    st.write(f"**Variance Score:** {score:.2f}")
 
-    # Decision logic (tunable threshold)
-    if score > 0.15:
-        st.error("Possible Tampered QR Code")
+    # Heuristic threshold
+    if score > 500:
+        st.error("⚠️ Possible Tampered QR Code")
     else:
-        st.success("Original QR Code")
+        st.success("✅ Original QR Code")
 
-    st.caption("Note: This is a lightweight demo using image analysis heuristics.")
+    st.caption("Note: Lightweight demo using image variance analysis.")
