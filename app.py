@@ -40,29 +40,23 @@ def predict(img):
     # Convert to grayscale
     gray = np.mean(img, axis=2)
 
-    # Feature 1: variance (noise)
+    # Variance (MAIN SIGNAL)
     variance = np.var(gray)
 
-    # Feature 2: edge roughness (manual gradient)
-    gx = np.abs(np.diff(gray, axis=1))
-    gy = np.abs(np.diff(gray, axis=0))
-    edge_strength = (np.mean(gx) + np.mean(gy)) / 2
-
-    return variance, edge_strength
+    return variance
 
 if uploaded_file:
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_column_width=True)
 
-    var_score, edge_score = predict(img)
+    score = predict(img)
 
-    st.write(f"**Variance Score:** {var_score:.2f}")
-    st.write(f"**Edge Score:** {edge_score:.2f}")
+    st.write(f"**Variance Score:** {score:.2f}")
 
-    # ✅ Better decision logic
-    if var_score > 8000 and edge_score > 25:
+    # ✅ FINAL LOGIC (based on your actual results)
+    if score < 7000:
         st.error("⚠️ Possible Tampered QR Code")
     else:
         st.success("✅ Original QR Code")
 
-    st.caption("Note: Lightweight demo using combined image heuristics.")
+    st.caption("Demo version using statistical image variance.")
