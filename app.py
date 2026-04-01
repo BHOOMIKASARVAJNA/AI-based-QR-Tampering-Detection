@@ -55,7 +55,7 @@ if uploaded_file:
 
     score = predict(img)
 
-    st.write(f"**Edge Score:** {score:.4f}")
+    st.write(f"Edge Score: {score:.4f}")
 
     # Decision logic (tunable threshold)
     if score > 0.15:
